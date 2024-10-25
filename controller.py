@@ -14,6 +14,9 @@ while True:
         Stack tasks = getTasks(move)
         for task in tasks:
             do task
+
     
     server.sendUCIResponse()
 """
+from table import do
+
