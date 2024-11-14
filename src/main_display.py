@@ -1,4 +1,4 @@
-# Name: main.py
+# Name: main_display.py
 # Author: Carter Hidalgo
 #
 # Purpose: handle display frontend, user input, and CPUs

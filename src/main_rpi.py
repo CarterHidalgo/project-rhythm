@@ -1,11 +1,18 @@
-# Name: backend.py
+# Name: main_rpi.py
 # Author: Carter Hidalgo
 #
 # Purpose: handle rpi backend network connection and scara movement
 
-import socket, threading, pickle, time
+import socket, threading, pickle, time, os, sys
 from backend.actions import Actions
 from colors.colors import light_green
+
+venv_path = os.path.expanduser("~/.env")
+activate_this = os.path.join(venv_path, "bin", "activate_this.py")
+with open(activate_this) as file_:
+    exec(file_.read(), {'__file__': activate_this})
+
+from RpiMotorLib import RpiMotorLib
 
 stop_broadcasting = threading.Event()
 

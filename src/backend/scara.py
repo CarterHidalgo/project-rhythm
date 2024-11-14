@@ -1,7 +1,7 @@
 # Name: robot.py
 # Author: Carter Hidalgo
 #
-# Purpose: Provide methods for controlling the scara
+# Purpose: Provide high level methods for controlling the scara
 
 from colors.colors import pink
 
