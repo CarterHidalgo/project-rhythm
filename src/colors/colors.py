@@ -26,3 +26,10 @@ def pink(text):
 
 def grey(text):
     return f"\033[90m{text}\033[0m"
+
+def orange(text):
+    return f"\033[38;5;214m{text}\033[0m"
+
+def light_green(text):
+    return f"\033[92m{text}\033[0m"
+

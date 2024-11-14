@@ -3,7 +3,7 @@
 #
 # Purpose: provide methods for understanding the properties of a move in algebraic notation e.g. "e2e4"
 
-from helper.board import Board
+from frontend.board import Board
 
 def is_capture(move):
     fromIndex, toIndex, promo = Board.parse_move(move)

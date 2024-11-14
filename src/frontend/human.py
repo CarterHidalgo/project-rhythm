@@ -4,10 +4,10 @@
 # Purpose: methods for sending uci commands from humans
 
 import os
-from helper.board import Board
-from helper.colors import yellow, green, cyan
-from helper.paths import stockfish_path
-from server.engine import Engine
+from frontend.board import Board
+from frontend.paths import stockfish_path
+from frontend.engine import Engine
+from colors.colors import yellow, green, cyan
 
 class Human:
     def __init__(self, name, color):
@@ -60,6 +60,8 @@ class Human:
                 Board.print()
             elif bestmove == "quit":
                 return "quit"
+            elif bestmove == "":
+                continue
             else:
                 print(f"[{self._text(self.name, self.color)}]: unknown command '{bestmove}'. Type help for more information.")
 

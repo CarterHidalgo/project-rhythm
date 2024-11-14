@@ -3,7 +3,7 @@
 #
 # Purpose: link tasks to scara action methods
 
-from scara.scara import Scara
+from backend.scara import Scara
 
 class Actions:
     lookup = {

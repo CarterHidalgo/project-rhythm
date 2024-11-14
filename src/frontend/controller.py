@@ -3,14 +3,15 @@
 #
 # Purpose: pass control and communication between server and scara loops and update board representation
 
-from server.server import Server
-from scara.manager import Manager
-from helper.board import Board
-from helper.move import make_move
-from helper.colors import purple, pink
+from frontend.server import Server
+from frontend.manager import Manager
+from frontend.board import Board
+from frontend.move import make_move
+from colors.colors import purple, pink
 
 class Controller:
     INIT_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    INIT = False
 
     def _get_players(self):
         player_one = ""
@@ -44,6 +45,7 @@ class Controller:
         self.turn = "server"
         self.server = Server(player_one, player_two)
         self.manager = Manager()
+        Controller.INIT = True
 
     def is_running(self):
         return self.running
@@ -68,6 +70,7 @@ class Controller:
 
     def close(self):
         print()
-        self.server.close()
+        if Controller.INIT:
+            self.server.close()
         self.running = False
         print(f"[{purple('controller')}]: closed")

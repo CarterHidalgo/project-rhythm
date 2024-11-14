@@ -3,12 +3,9 @@
 #
 # Purpose: methods for loading, sending, and receiving uci commands from chess engines
 
-import subprocess
-import re
-import threading
-import queue
-from helper.colors import yellow, green, cyan, grey
-from helper.board import Board
+import subprocess, re, threading, queue
+from frontend.board import Board
+from colors.colors import yellow, green, cyan, grey
 
 class Engine:
     UCIOK = r"uciok"

@@ -3,7 +3,7 @@
 #
 # Purpose: store a full stateless representation of the board
 
-from helper.colors import blue, red, yellow
+from colors.colors import blue, red, yellow
 
 class Board:
     play_time = 300000

@@ -3,7 +3,7 @@
 #
 # Purpose: Provide methods for controlling the scara
 
-from helper.colors import pink
+from colors.colors import pink
 
 class Scara:
     def _print(text):
@@ -57,4 +57,3 @@ class Scara:
         Scara._print("moves to high height")
         Scara._print("moves to start")
         Scara._print("releases")
-

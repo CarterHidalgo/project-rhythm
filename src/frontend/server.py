@@ -4,11 +4,11 @@
 # Purpose: send and receive uci commands with two players (either human or chess engine)
 
 import time
-from helper.board import Board
-from server.engine import Engine
-from server.human import Human
-from helper.colors import yellow, purple
-from helper.paths import berserk_path, obsidian_path
+from frontend.board import Board
+from frontend.engine import Engine
+from frontend.human import Human
+from frontend.paths import berserk_path, obsidian_path
+from colors.colors import yellow, purple
 
 class Server:
     def __init__(self, player_one, player_two):

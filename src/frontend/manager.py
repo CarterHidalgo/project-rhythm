@@ -3,11 +3,11 @@
 #
 # Purpose: manage messages between the scara and the controller
 
-import queue
-from helper.board import Board
-from helper.move import *
-from helper.colors import pink, purple
-from scara.actions import Actions
+import queue, time
+from frontend.client import Client
+from frontend.board import Board
+from frontend.move import *
+from colors.colors import pink, purple
 
 class Manager:
     def __init__(self):
@@ -63,15 +63,14 @@ class Manager:
             self._remove_piece(toIndex)
         self._quiet_move(fromIndex, toIndex)
 
-        return self.tasks
-
     def send_move_wait(self, move):
-        tasks = self.move_to_tasks(move)
-        while not tasks.empty():
-            cmd, args = tasks.get()
+        self.tasks.queue.clear()
+        self.move_to_tasks(move)
 
-            Actions.do(cmd, args)
+        Client.send_data(self.tasks)
+
+        while(Client.is_waiting()):
+            time.sleep(1)
         
-        print(f"[{pink('scara')}] -> [{purple('controller')}]: {move}")
         return move
 
