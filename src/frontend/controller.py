@@ -72,5 +72,7 @@ class Controller:
         print()
         if Controller.INIT:
             self.server.close()
+        # if self.manager:
+        #     self.manager.close()
         self.running = False
         print(f"[{purple('controller')}]: closed")

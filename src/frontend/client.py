@@ -41,7 +41,7 @@ class Client:
 
             response = ""
 
-            while not response == "readyok":
+            while (not response == "readyok") and Client.RUNNING:
                 response = conn.recv(1024).decode()
                 print(f"[{pink('scara')}]: {response}")
             
@@ -53,11 +53,12 @@ class Client:
     def _listen_to_broadcast():
         udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         udp_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        udp_socket.settimeout(5)
         udp_socket.bind(('', Client.UDP_PORT))
 
         print(f"[{orange('client')}]: listening for UDP broadasts on port {Client.UDP_PORT}...")
 
-        while Client.RUNNING:
+        try:
             message, address = udp_socket.recvfrom(1024)
             addr = message.decode().strip()
 
@@ -65,8 +66,16 @@ class Client:
                 print(f"[{orange('client')}]: received broadast from {addr}")
 
                 return addr
+        except Exception:
+            print(f"[{orange('client')}]: timeout while trying to connect to server")
+            return None
         
     def _connect_to_server(addr):
+        if not addr:
+            print(f"[{orange('client')}]: closed")
+            Client.RUNNING = False
+            return
+
         tcp_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         try:
@@ -80,7 +89,6 @@ class Client:
                     Client._send_and_wait(tcp_socket, Client.DATA)
 
                 time.sleep(1)
-
         except Exception as e:
             print(f"[{orange('client')}]: error connecting to server: {e}")
             return
@@ -100,6 +108,9 @@ class Client:
     
     def is_waiting():
         return Client.WAITING
+    
+    def is_running():
+        return Client.RUNNING
     
     def close():
         Client.RUNNING = False
