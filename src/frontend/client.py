@@ -43,7 +43,8 @@ class Client:
 
             while (not response == "readyok") and Client.RUNNING:
                 response = conn.recv(1024).decode()
-                print(f"[{pink('scara')}]: {response}")
+                if response:
+                    print(f"[{pink('scara')}]: {response}")
             
             Client.WAITING = False
 

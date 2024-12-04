@@ -14,7 +14,8 @@ class Manager:
         self.tasks = queue.Queue()
 
     def _print(self, text):
-        print(f"[{pink('scara')}]: {text}")
+        if text:
+            print(f"[{pink('scara')}]: {text}")
 
     def _quiet_move(self, fromIndex, toIndex):
         self.tasks.put(("move", fromIndex))
