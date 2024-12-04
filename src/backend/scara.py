@@ -31,10 +31,13 @@ class Scara:
         self.z_steps = 0
         self.joint_steps = 0
 
+        self.base_reduc = 20 # base is 20:1 reduction
+        self.joint_reduc = 16 # joint is 16:1 reduction
+
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
 
-    def _convert(self, target_angle, curr_steps):
+    def _convert(self, target_angle, curr_steps, reduc):
         curr_angle = (curr_steps * self.step_angle) % 360
         angle_diff = target_angle - curr_angle
 
@@ -43,20 +46,20 @@ class Scara:
         else:
             direction = False  # CW
 
-        steps = int(abs(angle_diff) / self.step_angle)
+        steps = int(abs(angle_diff) / self.step_angle) * reduc
 
         return steps, direction
 
     def move(self, x, y):
         theta1, theta2 = inverse_kinematics(x, y)
         
+        base_steps, base_dir = Scara._convert(theta1, self.base_steps, self.base_reduc)
+        joint_steps, joint_dir = Scara._convert(theta2, self.joint_steps, self.joint_reduc)
+
+        print(f"base: (step={base_steps}, dir={base_dir})")
+        print(f"joint: (step={joint_steps}, dir={joint_dir})")
+        
         with concurrent.futures.ThreadPoolExecutor() as executor:
-            base_steps, base_dir = Scara._convert(theta1, self.base_steps)
-            joint_steps, joint_dir = Scara._convert(theta2, self.joint_steps)
-
-            print(f"base: (step={base_steps}, dir={base_dir})")
-            print(f"joint: (step={joint_steps}, dir={joint_dir})")
-
             # arm_one = executor.submit(self.motor_base.motor_go, base_dir, "1/4", base_steps, 0.005, False, 0.05)
             # arm_two = executor.submit(self.motor_joint.motor_go, joint_dir, "1/4", joint_steps, 0.005, False, 0.05)
 
