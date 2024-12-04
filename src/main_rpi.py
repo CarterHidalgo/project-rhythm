@@ -43,6 +43,7 @@ def broadcase_ip():
 def start_server():
     host = '0.0.0.0'
     port = 12345
+    action = Actions()
     running = True
 
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as tcp_socket:
@@ -64,7 +65,7 @@ def start_server():
 
                 while tasks:
                     cmd, args = tasks.pop(0)
-                    response = Actions.do(cmd, args)
+                    response = action.do(cmd, args)
 
                     if response:
                         conn.send(response.encode())

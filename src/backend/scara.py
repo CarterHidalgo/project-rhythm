@@ -1,59 +1,70 @@
 # Name: robot.py
 # Author: Carter Hidalgo
 #
-# Purpose: Provide high level methods for controlling the scara
+# Purpose: Provide methods for controlling the scara
 
-from colors.colors import pink
+import concurrent.futures
+import Rpi.GPIO as GPIO
+from kinematics import inverse_kinematics
+from RpiMotorLib import RpiMotorLib
 
 class Scara:
-    def _print(text):
-        print(f"[{pink('scara')}]: {text}")
+    def __init__(self):
+        self.base_dir_pin = 20
+        self.base_step_pin = 21
 
-    def height(args):
-        if(len(args) != 1):
-            print(f"Expected 1 argument in setHeight but found {len(args)}")
-            return
+        self.z_dir_pin = 26
+        self.z_step_pin = 19
         
-        if(args[0] == 'p'):
-            Scara._print("moves to pawn height")
-        elif(args[0] == 'n'):
-            Scara._print("moves to knight height")
-        elif(args[0] == 'b'):
-            Scara._print("moves to bishop height")
-        elif(args[0] == "r"):
-            Scara._print("moves to rook height")
-        elif(args[0] == "q"):
-            Scara._print("moves to queen height")
-        elif(args[0] == "k"):
-            Scara._print("moves to king height")
-        elif(args[0] == "h"):
-            Scara._print("moves to high height")
+        self.joint_dir_pin = 6
+        self.joint_step_pin = 13
+        
+        self.motor_base = RpiMotorLib.A4988Nema(self.base_dir_pin, self.base_step_pin, (-1, -1, -1), "DRV8825")
+        self.motor_z = RpiMotorLib.A4988Nema(self.z_dir_pin, self.z_step_pin, (-1, -1, -1), "DRV8825")
+        self.motor_joint = RpiMotorLib.A4988Nema(self.joint_dir_pin, self.joint_step_pin, (-1, -1, -1), "DRV8825")
+
+        self.fullstep_angle = 1.8
+        self.step_angle = self.fullstep_angle / 4
+        self.steps_per_rev = int(360 / self.step_angle)
+        
+        self.base_steps = 0
+        self.z_steps = 0
+        self.joint_steps = 0
+
+        GPIO.setwarnings(False)
+        GPIO.setmode(GPIO.BCM)
+
+    def _convert(self, target_angle, curr_steps):
+        curr_angle = (curr_steps * self.step_angle) % 360
+        angle_diff = target_angle - curr_angle
+
+        if angle_diff > 0:
+            direction = True  # CCW
         else:
-            Scara._print(f"WARNING: Invalid height param sent {args[0]}")
+            direction = False  # CW
 
-    def move(args):
-        if(len(args) != 1):
-            Scara._print(f"WARNING: Expected 1 argument in move but found {len(args)}")
-            return
+        steps = int(abs(angle_diff) / self.step_angle)
 
-        if(args[0] < -16):
-            Scara._print(f"WARNING: Index {args[0]} out of range")
-        elif(args[0] < 0):
-            Scara._print(f"moves to white sideline {args[0]}")
-        elif(args[0] < 64):
-            Scara._print(f"moves to square {args[0]}")
-        elif(args[0] < 81):
-            Scara._print(f"moves to black sideline {args[0]}")
-        else:
-            Scara._print(f"WARNING: Index {args[0]} out of range")
+        return steps, direction
 
-    def grab(args):
-        Scara._print("grabs")
+    def move(self, x, y):
+        theta1, theta2 = inverse_kinematics(x, y)
+        
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            base_steps, base_dir = Scara._convert(theta1, self.base_steps)
+            joint_steps, joint_dir = Scara._convert(theta2, self.joint_steps)
 
-    def release(args):
-        Scara._print("releases")
+            print(f"base: (step={base_steps}, dir={base_dir})")
+            print(f"joint: (step={joint_steps}, dir={joint_dir})")
 
-    def reset(args):
-        Scara._print("moves to high height")
-        Scara._print("moves to start")
-        Scara._print("releases")
+            # arm_one = executor.submit(self.motor_base.motor_go, base_dir, "1/4", base_steps, 0.005, False, 0.05)
+            # arm_two = executor.submit(self.motor_joint.motor_go, joint_dir, "1/4", joint_steps, 0.005, False, 0.05)
+
+            # arm_one.result()
+            # arm_two.result()
+
+            self.base_steps += base_steps * (1 if base_dir else -1)
+            self.joint_steps += joint_steps * (1 if joint_dir else -1)
+
+    def calibrate(self):
+        print("calibrating scara")
