@@ -17,8 +17,12 @@ class Actions:
             "release": self.release,
             "reset": self.reset,
         }
+
+        # rough estimations (eyeball)
+        # ~14 in radius or 355.6 mm radius
+
         self.grid = {}
-        self.grid_start = (-300, 400) # (x, y) pos of leftmost, upper grid in mm
+        self.grid_start = (-300, 300) # (x, y) pos of leftmost, upper grid in mm
         self.grid_gap = abs(self.grid_start[0] * 2) / 11 # size of grid "square" in mm
 
         for x in range(12):
