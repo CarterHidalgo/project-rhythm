@@ -8,6 +8,8 @@ from colors.colors import pink
 
 class Actions:
     def __init__(self):
+        self.scara = Scara()
+
         self.lookup = {
             "height" : self.height,
             "move": self.move,
@@ -16,16 +18,13 @@ class Actions:
             "reset": self.reset,
         }
         self.grid = {}
-        self.grid_start = (-300, 400) # (x, y) pos of leftmost, lowest grid in mm
+        self.grid_start = (-300, 400) # (x, y) pos of leftmost, upper grid in mm
         self.grid_gap = abs(self.grid_start[0] * 2) / 11 # size of grid "square" in mm
 
         for x in range(12):
             for y in range(8):
                 index = x * 8 + y - 16
                 self.grid[index] = (self.grid_start[0] + x * self.grid_gap, self.grid_start[1] - y * self.grid_gap)
-        
-        for i in range(96):
-            print(str(i-16) + ": " + str(self.grid[i-16]))
 
     def _print(text):
         print(f"[{pink('scara')}]: {text}")
@@ -70,7 +69,7 @@ class Actions:
             Actions._print(f"WARNING: Index {args[0]} out of range")
             return
         
-        Scara.move(Scara.grid[args[0]])
+        self.scara.move(self.grid[args[0]][0], self.grid[args[0]][1])
 
     def grab(self, args):
         Actions._print("grabs")
@@ -84,4 +83,4 @@ class Actions:
         Actions._print("releases")
 
     def do(self, cmd, *args):
-        Actions.lookup[cmd](args)
+        self.lookup[cmd](args)
