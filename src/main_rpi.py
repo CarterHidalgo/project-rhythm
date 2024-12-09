@@ -2,6 +2,7 @@
 # Author: Carter Hidalgo
 #
 # Purpose: handle rpi backend network connection and scara movement
+# Command: source ~/.env/bin/activate
 
 import socket, threading, pickle, time, os, sys
 from backend.actions import Actions

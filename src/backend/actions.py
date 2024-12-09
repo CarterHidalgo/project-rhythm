@@ -77,14 +77,28 @@ class Actions:
 
     def grab(self, args):
         Actions._print("grabs")
+        self.scara.grab()
 
     def release(self, args):
         Actions._print("releases")
+        self.scara.release()
 
     def reset(self, args):
         Actions._print("moves to high height")
         Actions._print("moves to start")
         Actions._print("releases")
+
+    def test_full(self):
+        for tup in self.grid:
+            self.scara.move(tup[0], tup[1], True)
+
+    def test_small(self, start, end):
+        end += 1 # I want a closed range [start, end] not [start, end)
+        for x in range(start+16, end+16):
+            self.scara.move(self.grid[x+16][0], self.grid[x+16][1], True)
+
+    def test_index(self, index):
+        self.scara.move(self.grid[index+16][0], self.grid[index+16][1], True)
 
     def do(self, cmd, *args):
         self.lookup[cmd](args)
