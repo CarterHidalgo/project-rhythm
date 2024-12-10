@@ -9,4 +9,8 @@ from time import sleep
 
 scara = Scara()
 
-scara.test()
+scara.calibrate()
+
+sleep(1)
+
+scara.move(0, 200, True)

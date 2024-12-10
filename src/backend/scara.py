@@ -21,20 +21,25 @@ class Scara:
         self.end_dir_pin = 6
         self.end_step_pin = 13
 
+        self.z_dir_pin = 22
+        self.z_step_pin = 4
+
         self.servo_pin = 17
         
         self.motor_base = RpiMotorLib.A4988Nema(self.base_dir_pin, self.base_step_pin, (-1, -1, -1), "DRV8825")
         self.motor_joint = RpiMotorLib.A4988Nema(self.joint_dir_pin, self.joint_step_pin, (-1, -1, -1), "DRV8825")
         self.motor_end = RpiMotorLib.A4988Nema(self.end_dir_pin, self.end_step_pin, (-1, -1, -1), "DRV8825")
+        self.motor_z = RpiMotorLib.A4988Nema(self.z_dir_pin, self.z_step_pin, (-1, -1, -1), "A4988")
 
         self.fullstep_angle = 1.8
         self.step_angle = self.fullstep_angle / 4
         self.steps_per_rev = int(360 / self.step_angle)
         
         self.base_ang = 0
-        self.z_ang = 0
         self.joint_ang = 0
         self.servo_ang = 90
+
+        self.z_steps = 0
 
         self.base_limit_pin = 18
         self.joint_limit_pin = 23
@@ -43,7 +48,7 @@ class Scara:
 
         self.base_reduc = 25
         self.joint_reduc = 20.45
-        self.end_reduc = 6
+        self.end_reduc = 5.65
 
         GPIO.setwarnings(False)
         GPIO.setmode(GPIO.BCM)
@@ -98,13 +103,17 @@ class Scara:
             self.joint_ang = theta2
 
     def calibrate(self):
+        self.calibrate_z()
+
         with concurrent.futures.ThreadPoolExecutor() as executor:
             base = executor.submit(self.calibrate_base)
+            joint = executor.submit(self.calibrate_joint)
 
             base.result()
+            joint.result()
 
     def calibrate_base(self):
-        base_cal_thread = threading.Thread(target=self.motor_base.motor_go, args=(True, "1/4", 800 * self.base_reduc, 0.0005, False, 0.05))
+        base_cal_thread = threading.Thread(target=self.motor_base.motor_go, args=(True, "1/4", int(800 * self.base_reduc), 0.0005, False, 0.05))
 
         if not GPIO.input(self.base_limit_pin):
             base_cal_thread.start()
@@ -113,11 +122,15 @@ class Scara:
             sleep(0.1)
         self.motor_base.motor_stop()
 
-        self.motor_base.motor_go(False, "1/4", 9800, 0.0002, False, 0.05)
+        sleep(0.5)
+
+        self.motor_base.motor_go(False, "1/4", 9800, 0.0004, False, 0.05)
         self.motor_base.motor_stop()
 
+        self.base_ang = 90
+
     def calibrate_joint(self):
-        joint_cal_thread = threading.Thread(target=self.motor_joint.motor_go, args=(False, "1/4", int(800 * self.joint_reduc), 0.0005, True, 0.05))
+        joint_cal_thread = threading.Thread(target=self.motor_joint.motor_go, args=(True, "1/4", int(800 * self.joint_reduc), 0.0005, False, 0.05))
 
         if not GPIO.input(self.joint_limit_pin):
             joint_cal_thread.start()
@@ -126,11 +139,15 @@ class Scara:
             sleep(0.1)
         self.motor_joint.motor_stop()
 
-        self.motor_joint.motor_go(True, "1/4", 6970, 0.0002, False, 0.05)
+        sleep(0.5)
+
+        self.motor_joint.motor_go(False, "1/4", 6900, 0.0004, False, 0.05)
         self.motor_joint.motor_stop()
 
+        self.joint_ang = 0
+
     def calibrate_end(self):
-        end_cal_thread = threading.Thread(target=self.motor_end.motor_go, args=(True, "1/4", 800 * self.end_reduc, 0.001, False, 0.05))
+        end_cal_thread = threading.Thread(target=self.motor_end.motor_go, args=(True, "1/4", int(800 * self.end_reduc), 0.001, False, 0.05))
 
         if not GPIO.input(self.end_limit_pin):
             end_cal_thread.start()
@@ -139,7 +156,11 @@ class Scara:
             sleep(0.1)
         self.motor_end.motor_stop()
 
+        sleep(0.5)
 
+    def calibrate_z(self):
+        self.motor_z.motor_go(False, "1/4", 9600, 0.0004, False, 0.05)
+        self.z_steps = 9600
 
     def grab(self):
         if(self.servo_ang != 45):
@@ -159,4 +180,5 @@ class Scara:
         del self.pwm
 
     def test(self):
-        self.motor_end.motor_go(True, "1/4", 400 * self.end_reduc, 0.001, False, 0.05)
+        while True:
+            print(GPIO.input(self.joint_limit_pin))
