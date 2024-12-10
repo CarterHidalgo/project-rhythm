@@ -6,8 +6,11 @@
 from math import atan2, acos, sqrt, sin, cos, pi
 
 def inverse_kinematics(x, y):
-    L1 = 238.1  # Length of the first link in mm
-    L2 = 139.7  # Length of the second link in mm
+    # L1 = 231.8  # Length of the first link in mm
+    # L2 = 146.0  # Length of the second link in mm
+
+    L1 = 226
+    L2 = 136.5
 
     # temporary values for testing with SCARA simulator (see https://www.geogebra.org/m/E9g4q7F5)
     # L1 = 2.3

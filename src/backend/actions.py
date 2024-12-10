@@ -22,16 +22,24 @@ class Actions:
         # ~14 in radius or 355.6 mm radius
 
         self.grid = {}
-        self.grid_start = (-300, 300) # (x, y) pos of leftmost, upper grid in mm
-        self.grid_gap = abs(self.grid_start[0] * 2) / 11 # size of grid "square" in mm
+        self.square_zero = (-111.1, 339.7)
+        self.grid_gap = 31.75 #abs(self.square_zero[0] * 2) / 7
+        self.grid_start = (self.square_zero[0] - (2 * self.grid_gap), self.square_zero[1])
 
         for x in range(12):
             for y in range(8):
-                index = x * 8 + y - 16
+                index = x * 8 + y
                 self.grid[index] = (self.grid_start[0] + x * self.grid_gap, self.grid_start[1] - y * self.grid_gap)
 
     def _print(text):
         print(f"[{pink('scara')}]: {text}")
+
+    def _mm_to_in(self, mm):
+        inches = mm / 25.4
+        return round(inches, 1)
+
+    def calibrate(self):
+        self.scara.calibrate()
 
     def height(self, args):
         if(len(args) != 1):
@@ -73,7 +81,7 @@ class Actions:
             Actions._print(f"WARNING: Index {args[0]} out of range")
             return
         
-        self.scara.move(self.grid[args[0]][0], self.grid[args[0]][1])
+        self.scara.move(self.grid[args[0]][0], self.grid[args[0]][1], True, False)
 
     def grab(self, args):
         Actions._print("grabs")
@@ -95,10 +103,17 @@ class Actions:
     def test_small(self, start, end):
         end += 1 # I want a closed range [start, end] not [start, end)
         for x in range(start+16, end+16):
-            self.scara.move(self.grid[x+16][0], self.grid[x+16][1], True)
+            self.scara.move(self.grid[x+16][0], self.grid[x+16][1], True, False)
 
-    def test_index(self, index):
-        self.scara.move(self.grid[index+16][0], self.grid[index+16][1], True)
+    def test_index(self):
+        while True:
+            index = int(input("Enter square index: "))
+            self.scara.move(self.grid[index+16][0], self.grid[index+16][1], True, True)
+
+    def output_grid(self):
+        for index in range(96):
+            print(f"{index-16}: ({self._mm_to_in(self.grid[index][0])}, {self._mm_to_in(self.grid[index][1])}")
+        print(f"grid_size: {self.grid_gap}")
 
     def do(self, cmd, *args):
         self.lookup[cmd](args)
