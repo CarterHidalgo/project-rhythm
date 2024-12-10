@@ -9,6 +9,7 @@ from colors.colors import pink
 class Actions:
     def __init__(self):
         self.scara = Scara()
+        self.scara.calibrate()
 
         self.lookup = {
             "height" : self.height,
@@ -18,12 +19,9 @@ class Actions:
             "reset": self.reset,
         }
 
-        # rough estimations (eyeball)
-        # ~14 in radius or 355.6 mm radius
-
         self.grid = {}
         self.square_zero = (-111.1, 339.7)
-        self.grid_gap = 31.75 #abs(self.square_zero[0] * 2) / 7
+        self.grid_gap = 33
         self.grid_start = (self.square_zero[0] - (2 * self.grid_gap), self.square_zero[1])
 
         for x in range(12):
@@ -37,9 +35,6 @@ class Actions:
     def _mm_to_in(self, mm):
         inches = mm / 25.4
         return round(inches, 1)
-
-    def calibrate(self):
-        self.scara.calibrate()
 
     def height(self, args):
         if(len(args) != 1):
@@ -62,6 +57,9 @@ class Actions:
             Actions._print("moves to high height")
         else:
             Actions._print(f"WARNING: Invalid height param sent {args[0]}")
+            return
+        
+        self.scara.height(args[0])
 
     def move(self, args):
         if(len(args) != 1):
@@ -116,4 +114,7 @@ class Actions:
         print(f"grid_size: {self.grid_gap}")
 
     def do(self, cmd, *args):
-        self.lookup[cmd](args)
+        cont = input("command [y/n]: " + cmd)
+
+        if cont == "y":
+            self.lookup[cmd](args)

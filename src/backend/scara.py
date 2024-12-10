@@ -65,6 +65,16 @@ class Scara:
         self.pwm = GPIO.PWM(self.servo_pin, 50)
         self.pwm.start(0)
 
+        self.height = {
+            "p" : 7200,
+            "k" : 8000,
+            "b" : 8000,
+            "r" : 8000,
+            "q" : 8800,
+            "k" : 8800,
+            "h" : 9600,
+        }
+
     def _convert(self, target_angle, curr_angle, reduc, flip):
         angle_diff = target_angle - curr_angle
 
@@ -105,7 +115,7 @@ class Scara:
             print(f"motor {motor} not found")
 
     def move(self, x, y, debug, enable=True):
-        theta1, theta2 = inverse_kinematics(x, y)
+        theta1, theta2, phi = inverse_kinematics(x, y)
 
         if theta1 < 0 or theta1 > 180 or theta2 < 0 or theta2 > 180:
             safe_check = input(f"WARNING: large angles (theta1={theta1}, theta2={theta2}). continue? [y/n]")
@@ -114,23 +124,40 @@ class Scara:
         
         base_steps, base_dir = self._convert(theta1, self.base_ang, self.base_reduc, True)
         joint_steps, joint_dir = self._convert(theta2, self.joint_ang, self.joint_reduc, True)
+        end_steps, end_dir = self._convert(phi, self.end_ang, self.end_reduc, False)
 
         if debug:
             print(f"coord: (x={self._mm_to_in(x)}, y={self._mm_to_in(y)})")
             print(f"angles: (theta1={theta1}, theta2={theta2})")
             print(f"base: (step={base_steps}, dir={base_dir})")
             print(f"joint: (step={joint_steps}, dir={joint_dir})")
+            print(f"end: (steps={end_steps}, dir={end_steps})")
         
         if enable:
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                arm_one = executor.submit(self.motor_base.motor_go, base_dir, "1/4", base_steps, 0.001, False, 0.05)
-                arm_two = executor.submit(self.motor_joint.motor_go, joint_dir, "1/4", joint_steps, 0.001, False, 0.05)
+                base = executor.submit(self.motor_base.motor_go, base_dir, "1/4", base_steps, 0.001, False, 0.05)
+                joint = executor.submit(self.motor_joint.motor_go, joint_dir, "1/4", joint_steps, 0.001, False, 0.05)
+                end = executor.submit(self.motor_end.motor_go, end_dir, "1/4", end_steps, 0.001, False, 0.05)
 
-                arm_one.result()
-                arm_two.result()
+                base.result()
+                joint.result()
+                end.result()
 
                 self.base_ang = theta1
                 self.joint_ang = theta2
+                self.end_ang = phi
+
+    def height(self, height):
+        deff = self.z_steps - height
+
+        if deff > 0:
+            dir = False
+        elif deff < 0:
+            dir = True
+        else:
+            return
+        
+        self.move_motor("z", dir, deff * self.step_angle)
 
     def calibrate(self):
         self.calibrate_z()

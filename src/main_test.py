@@ -9,5 +9,6 @@ from backend.scara import Scara
 from time import sleep
 
 actions = Actions()
-actions.calibrate()
-actions.test_index()
+actions.grab(None)
+sleep(1)
+actions.release(None)
