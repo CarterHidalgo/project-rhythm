@@ -8,7 +8,6 @@ from colors.colors import orange, pink
 
 class Client:
     UDP_PORT = 54321
-    TCP_PORT = 12345
     DATA = None
     CONNECTED = False
     RUNNING = True
