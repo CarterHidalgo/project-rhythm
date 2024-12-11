@@ -1,5 +1,8 @@
 # Project Rhythm
 
+## Chess Robotic Arm
+A SCARA robot that is capable of playing chess!
+## ![Scara Robot](assets/scara_robot.png)
 
 ## Description
 
@@ -15,7 +18,7 @@ Project Rhythm is a command line program that allows two players (human or cpu) 
 
 ## Running
 
-To run the program, simply download the project folder and store it somewhere in your file system. Be the folder you put it in includes both /src and /assets. Navigate to the root and run ```python main.py```. Enter ```human``` or ```cpu``` for players. If you select ```human```, type ```help``` for more information on commands and functions.
+To run the program, simply download the project folder on both the display machine and the Raspberry Pi and store it somewhere in the file system. Be sure the folder you put it in includes both /src and /assets. Navigate to the root on the Pi in the command line and run ```python main_rpi.py``` to begin broadcasting to the display. On the display machine, again navigate to the root in the command line, but this time run ```python main_display.py```. Enter ```human``` or ```cpu``` for players. If you select ```human```, type ```help``` for more information on commands and functions. On the first move, the Raspberry Pi will ask you to confirm calibration by entering ```y```. 
 
 ## Example Run
 
@@ -35,4 +38,4 @@ If you are interested, you can review ```synthetic_data.py``` to see my blender 
 
 ## Contributing
 
-Contributions are welcome! Feel free to open issues or submit pull requests. I will do my best to remain active.
+Contributions are welcome! Feel free to open issues or submit pull requests. This is an active project that is receiving regular updates. 

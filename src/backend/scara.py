@@ -163,7 +163,7 @@ class Scara:
         self.move_motor("z", dir, abs(deff * self.step_angle))
         self.z_steps = self.height_values[height]
 
-    def calibrate(self):
+    def safe_calibrate(self):
         self.calibrate_z()
         self.calibrate_end()
         self.calibrate_joint()
@@ -176,15 +176,17 @@ class Scara:
 
         self.calibrated = True
 
-        # self.calibrate_z()
-        # self.calibrate_end()
+    def calibrate(self):
+        self.calibrate_z()
 
-        # with concurrent.futures.ThreadPoolExecutor() as executor:
-        #     base = executor.submit(self.calibrate_base)
-        #     joint = executor.submit(self.calibrate_joint)
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            base = executor.submit(self.calibrate_base)
+            joint = executor.submit(self.calibrate_joint)
+            end = executor.submit(self.calibrate_end)
 
-        #     base.result()
-        #     joint.result()
+            base.result()
+            joint.result()
+            end.result()
 
     def calibrate_base(self):
         base_cal_thread = threading.Thread(target=self.motor_base.motor_go, args=(True, "1/4", int(800 * self.base_reduc), 0.0005, False, 0.05))
@@ -264,4 +266,4 @@ class Scara:
 
     def close(self):
         self.pwm.stop()
-        del self.pwm
+        del self.pwm # Known issue with RPi.GPIO library on pwm.stop and gpio.cleanup (see github.com/waveform80/rpi-lgpio/issues/15)

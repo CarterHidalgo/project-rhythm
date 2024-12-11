@@ -74,5 +74,3 @@ class Manager:
             time.sleep(1)
         
         return move
-    
-    # def close(self):

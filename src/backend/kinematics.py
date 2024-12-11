@@ -6,15 +6,9 @@
 from math import atan2, acos, sqrt, sin, cos, pi
 
 def inverse_kinematics(x, y):
-    # L1 = 231.8  # Length of the first link in mm
-    # L2 = 146.0  # Length of the second link in mm
-
+    # Arm lengths in mm (see https://www.geogebra.org/m/E9g4q7F5)
     L1 = 226
     L2 = 136.5
-
-    # temporary values for testing with SCARA simulator (see https://www.geogebra.org/m/E9g4q7F5)
-    # L1 = 2.3
-    # L2 = 1.3
 
     # Calculate the distance from the origin to the target point
     distance = sqrt(x**2 + y**2)

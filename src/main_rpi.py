@@ -2,7 +2,7 @@
 # Author: Carter Hidalgo
 #
 # Purpose: handle rpi backend network connection and scara movement
-# Command: source ~/.env/bin/activate
+# VM Command: source ~/.env/bin/activate
 
 import socket, threading, pickle, time
 from backend.actions import Actions
@@ -20,7 +20,7 @@ def _get_ip():
 
     return ip
 
-def broadcase_ip():
+def broadcast_ip():
     ip = _get_ip()
     port = 12345
     broadcast_port = 54321
@@ -57,11 +57,10 @@ def start_server():
                 serialized_data = conn.recv(data_len)
                 tasks = pickle.loads(serialized_data)
 
-
                 while tasks:
                     print(tasks)
                     cmd, args = tasks.pop(0)
-                    response = action.do(str(cmd), str(args))
+                    action.do(str(cmd), str(args))
                 
                 conn.send("readyok".encode())
             
@@ -70,7 +69,7 @@ def start_server():
                 running = False
 
 def main():
-    broadcast_thread = threading.Thread(target=broadcase_ip)
+    broadcast_thread = threading.Thread(target=broadcast_ip)
     broadcast_thread.start()
 
     start_server()

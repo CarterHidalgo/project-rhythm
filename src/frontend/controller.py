@@ -31,7 +31,6 @@ class Controller:
 
         return player_one, player_two
 
-
     def __init__(self):
         self.running = True
         Board.set_with_fen(Controller.INIT_FEN)
@@ -72,7 +71,5 @@ class Controller:
         print()
         if Controller.INIT:
             self.server.close()
-        # if self.manager:
-        #     self.manager.close()
         self.running = False
         print(f"[{purple('controller')}]: closed")

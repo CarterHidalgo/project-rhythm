@@ -21,7 +21,7 @@ class Actions:
 
         self.grid = {}
         self.square_zero = (-116.5, 342.9)
-        self.grid_gap = 33#31.75
+        self.grid_gap = 33
         self.grid_start = (self.square_zero[0] - (2 * self.grid_gap), self.square_zero[1])
 
         for x in range(12):
@@ -93,8 +93,11 @@ class Actions:
 
     def reset(self, args):
         Actions._print("moves to high height")
+        self.height("h")
         Actions._print("moves to start")
+        self.move("0")
         Actions._print("releases")
+        self.release(None)
 
     def test_full(self):
         for tup in self.grid:
@@ -121,7 +124,5 @@ class Actions:
             if cal == "y":
                 self.scara.calibrate()
         
-        # cont = input(f"[{light_green('rpi')}]: {cmd}({args}) [y/n]: ")
-        # if cont == "y":
         sleep(0.5)
         self.lookup[cmd](args)
