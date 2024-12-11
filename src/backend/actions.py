@@ -4,12 +4,12 @@
 # Purpose: link tasks to scara action methods
 
 from backend.scara import Scara
-from colors.colors import pink
+from colors.colors import pink, light_green
+from time import sleep
 
 class Actions:
     def __init__(self):
         self.scara = Scara()
-        self.scara.calibrate()
 
         self.lookup = {
             "height" : self.height,
@@ -20,8 +20,8 @@ class Actions:
         }
 
         self.grid = {}
-        self.square_zero = (-111.1, 339.7)
-        self.grid_gap = 33
+        self.square_zero = (-116.5, 342.9)
+        self.grid_gap = 33#31.75
         self.grid_start = (self.square_zero[0] - (2 * self.grid_gap), self.square_zero[1])
 
         for x in range(12):
@@ -65,21 +65,23 @@ class Actions:
         if(len(args) != 1):
             Actions._print(f"WARNING: Expected 1 argument in move but found {len(args)}")
             return
+        
+        arg = int(args[0])
 
-        if(args[0] < -16):
-            Actions._print(f"WARNING: Index {args[0]} out of range")
+        if(arg < -16):
+            Actions._print(f"WARNING: Index {arg} out of range")
             return
-        elif(args[0] < 0):
-            Actions._print(f"moves to white sideline {args[0]}")
-        elif(args[0] < 64):
-            Actions._print(f"moves to square {args[0]}")
-        elif(args[0] < 80):
-            Actions._print(f"moves to black sideline {args[0]}")
+        elif(arg < 0):
+            Actions._print(f"moves to white sideline {arg}")
+        elif(arg < 64):
+            Actions._print(f"moves to square {arg}")
+        elif(arg < 80):
+            Actions._print(f"moves to black sideline {arg}")
         else:
-            Actions._print(f"WARNING: Index {args[0]} out of range")
+            Actions._print(f"WARNING: Index {arg} out of range")
             return
         
-        self.scara.move(self.grid[args[0]][0], self.grid[args[0]][1], True, False)
+        self.scara.move(self.grid[arg+16][0], self.grid[arg+16][1], True)
 
     def grab(self, args):
         Actions._print("grabs")
@@ -114,7 +116,12 @@ class Actions:
         print(f"grid_size: {self.grid_gap}")
 
     def do(self, cmd, *args):
-        cont = input("command [y/n]: " + cmd)
-
-        if cont == "y":
-            self.lookup[cmd](args)
+        if not self.scara.get_calibrated():
+            cal = input(f"[{light_green('rpi')}]: calibrate [y/n]: ")
+            if cal == "y":
+                self.scara.calibrate()
+        
+        # cont = input(f"[{light_green('rpi')}]: {cmd}({args}) [y/n]: ")
+        # if cont == "y":
+        sleep(0.5)
+        self.lookup[cmd](args)

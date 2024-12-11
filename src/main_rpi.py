@@ -4,10 +4,9 @@
 # Purpose: handle rpi backend network connection and scara movement
 # Command: source ~/.env/bin/activate
 
-import socket, threading, pickle, time, os, sys
+import socket, threading, pickle, time
 from backend.actions import Actions
 from colors.colors import light_green
-from RpiMotorLib import RpiMotorLib
 
 stop_broadcasting = threading.Event()
 
@@ -58,12 +57,11 @@ def start_server():
                 serialized_data = conn.recv(data_len)
                 tasks = pickle.loads(serialized_data)
 
-                while tasks:
-                    cmd, args = tasks.pop(0)
-                    response = action.do(cmd, args)
 
-                    if response:
-                        conn.send(response.encode())
+                while tasks:
+                    print(tasks)
+                    cmd, args = tasks.pop(0)
+                    response = action.do(str(cmd), str(args))
                 
                 conn.send("readyok".encode())
             

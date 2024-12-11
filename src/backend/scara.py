@@ -12,6 +12,8 @@ from backend.kinematics import inverse_kinematics
 
 class Scara:
     def __init__(self):
+        self.calibrated = False
+
         self.base_dir_pin = 20
         self.base_step_pin = 21
         
@@ -25,7 +27,7 @@ class Scara:
         self.z_step_pin = 4
 
         self.servo_pin = 17
-        self.servo_closed = 45
+        self.servo_closed = 60
         self.servo_open = 160
         
         self.motor_base = RpiMotorLib.A4988Nema(self.base_dir_pin, self.base_step_pin, (-1, -1, -1), "DRV8825")
@@ -39,6 +41,7 @@ class Scara:
         
         self.base_ang = 0
         self.joint_ang = 0
+        self.end_ang = 0
         self.servo_ang = 90
 
         self.z_steps = 0
@@ -65,13 +68,13 @@ class Scara:
         self.pwm = GPIO.PWM(self.servo_pin, 50)
         self.pwm.start(0)
 
-        self.height = {
-            "p" : 7200,
-            "k" : 8000,
-            "b" : 8000,
-            "r" : 8000,
-            "q" : 8800,
-            "k" : 8800,
+        self.height_values = {
+            "p" : 3600,
+            "n" : 4100,
+            "b" : 4100,
+            "r" : 5000,
+            "q" : 5000,
+            "k" : 5200,
             "h" : 9600,
         }
 
@@ -128,16 +131,16 @@ class Scara:
 
         if debug:
             print(f"coord: (x={self._mm_to_in(x)}, y={self._mm_to_in(y)})")
-            print(f"angles: (theta1={theta1}, theta2={theta2})")
+            print(f"angles: (theta1={theta1}, theta2={theta2}, phi={phi})")
             print(f"base: (step={base_steps}, dir={base_dir})")
             print(f"joint: (step={joint_steps}, dir={joint_dir})")
-            print(f"end: (steps={end_steps}, dir={end_steps})")
+            print(f"end: (steps={end_steps}, dir={end_dir})")
         
         if enable:
             with concurrent.futures.ThreadPoolExecutor() as executor:
-                base = executor.submit(self.motor_base.motor_go, base_dir, "1/4", base_steps, 0.001, False, 0.05)
-                joint = executor.submit(self.motor_joint.motor_go, joint_dir, "1/4", joint_steps, 0.001, False, 0.05)
-                end = executor.submit(self.motor_end.motor_go, end_dir, "1/4", end_steps, 0.001, False, 0.05)
+                base = executor.submit(self.motor_base.motor_go, base_dir, "1/4", base_steps, 0.0005, False, 0.05)
+                joint = executor.submit(self.motor_joint.motor_go, joint_dir, "1/4", joint_steps, 0.0005, False, 0.05)
+                end = executor.submit(self.motor_end.motor_go, end_dir, "1/4", end_steps, 0.0005, False, 0.05)
 
                 base.result()
                 joint.result()
@@ -148,16 +151,17 @@ class Scara:
                 self.end_ang = phi
 
     def height(self, height):
-        deff = self.z_steps - height
+        deff = self.z_steps - self.height_values[height]
 
         if deff > 0:
-            dir = False
-        elif deff < 0:
             dir = True
+        elif deff < 0:
+            dir = False
         else:
             return
         
-        self.move_motor("z", dir, deff * self.step_angle)
+        self.move_motor("z", dir, abs(deff * self.step_angle))
+        self.z_steps = self.height_values[height]
 
     def calibrate(self):
         self.calibrate_z()
@@ -169,7 +173,8 @@ class Scara:
         self.move_motor("joint", False, 120)
         self.calibrate_base()
         self.move_motor("joint", True, 120)
-        self.move_motor("z", True, 2400)
+
+        self.calibrated = True
 
         # self.calibrate_z()
         # self.calibrate_end()
@@ -233,7 +238,7 @@ class Scara:
         self.end_ang = 0
 
     def calibrate_z(self):
-        self.motor_z.motor_go(False, "1/4", 9600, 0.0004, False, 0.05)
+        self.motor_z.motor_go(False, "1/4", 9600, 0.0005, False, 0.05)
         self.z_steps = 9600
 
     def grab(self):
@@ -253,6 +258,9 @@ class Scara:
         while True:
             print(f"base: {GPIO.input(self.base_limit_pin)}, joint: {GPIO.input(self.joint_limit_pin)}, end: {GPIO.input(self.end_limit_pin)}")
             sleep(0.1)
+
+    def get_calibrated(self):
+        return self.calibrated
 
     def close(self):
         self.pwm.stop()

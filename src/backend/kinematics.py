@@ -30,13 +30,12 @@ def inverse_kinematics(x, y):
     # Calculate theta1 using the law of cosines and atan2 for direction
     theta1 = atan2(y, x) - atan2(L2 * sin(theta2), L1 + L2 * cos(theta2))
 
-    # Calculate phi to ensure the end effector is parallel to the x-axis
-    phi = (-theta2) + (90 - theta1)
-
     # Convert angles from radians to degrees
     theta1 = theta1 * 180 / pi
     theta2 = theta2 * 180 / pi
-    phi = phi * 180 / pi
+
+    # Calculate phi to ensure the end effector is parallel to the x-axis
+    phi = (-theta2) + (90 - theta1)
 
     # Return angles rounded to one decimal place
     return round(theta1, 1), round(theta2, 1), round(phi, 1)

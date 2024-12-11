@@ -8,7 +8,12 @@ from backend.actions import Actions
 from backend.scara import Scara
 from time import sleep
 
-actions = Actions()
-actions.grab(None)
-sleep(1)
-actions.release(None)
+# actions = Actions()
+
+# while True:
+#     cmd = input("command: ")
+#     args = input("args: ")
+#     actions.do(cmd, args)
+
+scara = Scara()
+scara.release()
