@@ -1,7 +1,7 @@
 # Project Rhythm
 
 ## Chess Robotic Arm
-A SCARA robot that is capable of playing chess!
+A SCARA robot that is capable of playing chess! (demo: https://www.youtube.com/watch?v=sYHs7Bo3A0A)
 ## ![Scara Robot](assets/scara_robot.png)
 
 ## Description
